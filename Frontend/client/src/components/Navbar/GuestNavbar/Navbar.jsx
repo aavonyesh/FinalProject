@@ -1,6 +1,24 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { assets } from "../../../assets/assets";
+import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
+const BookIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="lucide lucide-book-marked-icon lucide-book-marked"
+  >
+    <path d="M10 2v8l3-3 3 3V2" />
+    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
+  </svg>
+);
 const Navbar = () => {
   const navLinks = [
     { name: "Home", path: "/" },
@@ -11,6 +29,10 @@ const Navbar = () => {
 
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { openSignIn } = useClerk();
+  const { user } = useUser();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -72,15 +94,41 @@ const Navbar = () => {
 
       {/* Desktop Right */}
       <div className="hidden md:flex items-center gap-4">
-        <img src={assets.searchIcon} alt="search" className={`${isScrolled && 'invert'} h-7 transition-all duration-500`}/>
-        <button className="bg-black text-white px-8 py-2.5 rounded-full ml-4 transition-all duration-500">
-          Login
-        </button>
+        <img
+          src={assets.searchIcon}
+          alt="search"
+          className={`${
+            isScrolled && "invert"
+          } h-7 transition-all duration-500`}
+        />
+        {user ? (
+          <UserButton>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label="My Bookings"
+                labelIcon={<BookIcon />}
+                onClick={() => navigate("/my-bookings")}
+              />
+            </UserButton.MenuItems>
+          </UserButton>
+        ) : (
+          <button
+            onClick={openSignIn}
+            className="bg-black text-white px-8 py-2.5 rounded-full ml-4 transition-all duration-500"
+          >
+            Login
+          </button>
+        )}
       </div>
 
       {/* Mobile Menu Button */}
       <div className="flex items-center gap-3 md:hidden">
-        <img onClick={()=>setIsMenuOpen(!isMenuOpen)} src={assets.menuIcon} alt="" className={`${isScrolled && 'invert'} h-4`}/>
+        <img
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          src={assets.menuIcon}
+          alt=""
+          className={`${isScrolled && "invert"} h-4`}
+        />
       </div>
 
       {/* Mobile Menu */}
@@ -106,7 +154,10 @@ const Navbar = () => {
           Dashboard
         </button>
 
-        <button className="bg-black text-white px-8 py-2.5 rounded-full transition-all duration-500">
+        <button
+          onClick={openSignIn}
+          className="bg-black text-white px-8 py-2.5 rounded-full transition-all duration-500"
+        >
           Login
         </button>
       </div>
