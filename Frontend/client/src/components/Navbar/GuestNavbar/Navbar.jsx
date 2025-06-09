@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { assets } from "../../../assets/assets";
 import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
@@ -27,20 +27,28 @@ const Navbar = () => {
     { name: "About", path: "/" },
   ];
 
-  const [isScrolled, setIsScrolled] = React.useState(false);
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { openSignIn } = useClerk();
   const { user } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if(location.pathname!=='/'){
+      setIsScrolled(true)
+      return;
+    }
+    else{
+      setIsScrolled(false)
+    }
+    setIsScrolled(prev => location.pathname!=='/' ? true : prev)
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [location.pathname]);
 
   return (
     <nav
@@ -86,7 +94,7 @@ const Navbar = () => {
         <button
           className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${
             isScrolled ? "text-black" : "text-white"
-          } transition-all`}
+          } transition-all`} onClick={()=>navigate('/owner')}
         >
           Dashboard
         </button>
@@ -122,7 +130,17 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu Button */}
+      
       <div className="flex items-center gap-3 md:hidden">
+        {user && <UserButton>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label="My Bookings"
+                labelIcon={<BookIcon />}
+                onClick={() => navigate("/my-bookings")}
+              />
+            </UserButton.MenuItems>
+          </UserButton>}
         <img
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           src={assets.menuIcon}
@@ -132,6 +150,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
+      
       <div
         className={`fixed top-0 left-0 w-full h-screen bg-white text-base flex flex-col md:hidden items-center justify-center gap-6 font-medium text-gray-800 transition-all duration-500 ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
@@ -150,16 +169,15 @@ const Navbar = () => {
           </a>
         ))}
 
-        <button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all">
+        {user  && <button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all" onClick={()=>navigate('/owner')}>
           Dashboard
-        </button>
-
-        <button
+        </button>}
+{!user && <button
           onClick={openSignIn}
           className="bg-black text-white px-8 py-2.5 rounded-full transition-all duration-500"
         >
           Login
-        </button>
+        </button>}
       </div>
     </nav>
   );
