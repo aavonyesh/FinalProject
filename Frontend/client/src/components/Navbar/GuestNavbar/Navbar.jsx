@@ -35,14 +35,13 @@ const Navbar = () => {
   const location = useLocation();
 
   useEffect(() => {
-    if(location.pathname!=='/'){
-      setIsScrolled(true)
+    if (location.pathname !== "/") {
+      setIsScrolled(true);
       return;
+    } else {
+      setIsScrolled(false);
     }
-    else{
-      setIsScrolled(false)
-    }
-    setIsScrolled(prev => location.pathname!=='/' ? true : prev)
+    setIsScrolled((prev) => (location.pathname !== "/" ? true : prev));
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
@@ -66,7 +65,9 @@ const Navbar = () => {
           className={`h-9 ${isScrolled ? "invert opacity-80" : ""}`}
         />
         <span
-          className="text-2xl font-bold text-white"
+          className={`text-2xl font-bold transition-colors duration-300 ${
+            isScrolled ? "text-gray-800" : "text-white"
+          }`}
           style={{ fontFamily: "Poppins, sans-serif" }}
         >
           ReservAi
@@ -94,7 +95,8 @@ const Navbar = () => {
         <button
           className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${
             isScrolled ? "text-black" : "text-white"
-          } transition-all`} onClick={()=>navigate('/owner')}
+          } transition-all`}
+          onClick={() => navigate("/owner")}
         >
           Dashboard
         </button>
@@ -130,9 +132,10 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu Button */}
-      
+
       <div className="flex items-center gap-3 md:hidden">
-        {user && <UserButton>
+        {user && (
+          <UserButton>
             <UserButton.MenuItems>
               <UserButton.Action
                 label="My Bookings"
@@ -140,7 +143,8 @@ const Navbar = () => {
                 onClick={() => navigate("/my-bookings")}
               />
             </UserButton.MenuItems>
-          </UserButton>}
+          </UserButton>
+        )}
         <img
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           src={assets.menuIcon}
@@ -150,7 +154,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
-      
+
       <div
         className={`fixed top-0 left-0 w-full h-screen bg-white text-base flex flex-col md:hidden items-center justify-center gap-6 font-medium text-gray-800 transition-all duration-500 ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
@@ -169,15 +173,22 @@ const Navbar = () => {
           </a>
         ))}
 
-        {user  && <button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all" onClick={()=>navigate('/owner')}>
-          Dashboard
-        </button>}
-{!user && <button
-          onClick={openSignIn}
-          className="bg-black text-white px-8 py-2.5 rounded-full transition-all duration-500"
-        >
-          Login
-        </button>}
+        {user && (
+          <button
+            className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all"
+            onClick={() => navigate("/owner")}
+          >
+            Dashboard
+          </button>
+        )}
+        {!user && (
+          <button
+            onClick={openSignIn}
+            className="bg-black text-white px-8 py-2.5 rounded-full transition-all duration-500"
+          >
+            Login
+          </button>
+        )}
       </div>
     </nav>
   );
