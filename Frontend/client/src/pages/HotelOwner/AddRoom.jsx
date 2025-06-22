@@ -89,10 +89,14 @@ const AddRoom = () => {
         {Object.keys(inputs.amenities).map((amenity,index)=>(
           <div key={index}>
             <input type="checkbox" id={`amenities${index+1}`} checked={inputs.amenities[amenity]} onChange={()=>setInputs({...inputs,amenities:{...inputs.amenities,[amenity]: !inputs.amenities[amenity]}})} />
+            <label htmlFor={`amenities${index+1}`}>{amenity}</label>
           </div>
         ))}
 
       </div>
+      <button className="bg-primary text-white px-8 py-2 rounded mt-8 cursor-pointer">
+        Add Room
+      </button>
     </form>
   );
 };
