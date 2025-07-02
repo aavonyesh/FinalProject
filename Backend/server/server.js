@@ -8,13 +8,9 @@ import clerkWebhooks from "./controllers/clerkWebhooks.js";
 connectDB()
 const app = express();
 app.use(cors());
-
-
-// Middleware
 app.use(express.json())
 app.use(clerkMiddleware())
-
-app.use("/api/clerk", clerkWebhooks)
+app.use("/api/clerk",clerkWebhooks)
 
 app.get("/", (req, res) => res.send("API is working"));
 
