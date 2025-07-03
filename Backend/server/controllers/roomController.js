@@ -10,15 +10,54 @@ export const createRoom = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-// Bütün otaqları gətir
+// Bütün otaqları gətir - sort və filter dəstəyi ilə
+
+
 export const getAllRooms = async (req, res) => {
   try {
-    const rooms = await Room.find().populate("hotel");
+    let filter = {};
+
+    // Filter parametrləri yoxdursa filter boş qalacaq və bütün otaqları gətirəcək
+    const { sort, roomTypes, minPrice, maxPrice, isAvailable } = req.query;
+
+    if (roomTypes) {
+      const types = roomTypes.split(",");
+      filter.roomType = { $in: types };
+    }
+
+    if (minPrice && maxPrice) {
+      filter.pricePerNight = { $gte: Number(minPrice), $lte: Number(maxPrice) };
+    } else if (minPrice) {
+      filter.pricePerNight = { $gte: Number(minPrice) };
+    } else if (maxPrice) {
+      filter.pricePerNight = { $lte: Number(maxPrice) };
+    }
+
+    if (isAvailable !== undefined) {
+      filter.isAvailable = isAvailable === "true";
+    }
+
+    // Burada populate("hotel")-i müvəqqəti söndür, test üçün:
+    // let rooms = await Room.find(filter);
+    let query = Room.find(filter).populate("hotel");
+
+    if (sort === "price_asc") query = query.sort({ pricePerNight: 1 });
+    else if (sort === "price_desc") query = query.sort({ pricePerNight: -1 });
+    else if (sort === "newest") query = query.sort({ createdAt: -1 });
+
+    const rooms = await query;
+
+    // Test: Backenddən data var ya yox, bunu konsola yazdır:
+    console.log("Rooms found:", rooms.length);
+
     res.json(rooms);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 // Bütün otaqları bir otelə görə gətir
 export const getRoomsByHotel = async (req, res) => {
