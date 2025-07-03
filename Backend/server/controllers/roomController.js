@@ -10,15 +10,16 @@ export const createRoom = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-// Bütün otaqları gətir - sort və filter dəstəyi ilə
 
-
+// Bütün otaqları gətir (yalnız isDeleted: false olanları)
 export const getAllRooms = async (req, res) => {
   try {
-    let filter = {};
+    const { sort, roomTypes, minPrice, maxPrice, isAvailable, withDeleted } = req.query;
 
-    // Filter parametrləri yoxdursa filter boş qalacaq və bütün otaqları gətirəcək
-    const { sort, roomTypes, minPrice, maxPrice, isAvailable } = req.query;
+    let filter = {};
+    if (withDeleted !== "true") {
+      filter.isDeleted = false; // default olaraq gizlədilmişləri göstərmə
+    }
 
     if (roomTypes) {
       const types = roomTypes.split(",");
@@ -26,7 +27,10 @@ export const getAllRooms = async (req, res) => {
     }
 
     if (minPrice && maxPrice) {
-      filter.pricePerNight = { $gte: Number(minPrice), $lte: Number(maxPrice) };
+      filter.pricePerNight = {
+        $gte: Number(minPrice),
+        $lte: Number(maxPrice),
+      };
     } else if (minPrice) {
       filter.pricePerNight = { $gte: Number(minPrice) };
     } else if (maxPrice) {
@@ -37,8 +41,6 @@ export const getAllRooms = async (req, res) => {
       filter.isAvailable = isAvailable === "true";
     }
 
-    // Burada populate("hotel")-i müvəqqəti söndür, test üçün:
-    // let rooms = await Room.find(filter);
     let query = Room.find(filter).populate("hotel");
 
     if (sort === "price_asc") query = query.sort({ pricePerNight: 1 });
@@ -46,30 +48,15 @@ export const getAllRooms = async (req, res) => {
     else if (sort === "newest") query = query.sort({ createdAt: -1 });
 
     const rooms = await query;
-
-    // Test: Backenddən data var ya yox, bunu konsola yazdır:
-    console.log("Rooms found:", rooms.length);
-
     res.json(rooms);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
 
 
 
-// Bütün otaqları bir otelə görə gətir
-export const getRoomsByHotel = async (req, res) => {
-  try {
-    const rooms = await Room.find({ hotel: req.params.hotelId });
-    res.json(rooms);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-// Tək otaq gətir (ID ilə)
+// Tək otaq gətir
 export const getRoomById = async (req, res) => {
   try {
     const room = await Room.findById(req.params.id).populate("hotel");
@@ -80,10 +67,12 @@ export const getRoomById = async (req, res) => {
   }
 };
 
-// Otaq yenilə
+// Otaq yenilə (gizlət/göstər daxil)
 export const updateRoom = async (req, res) => {
   try {
-    const updatedRoom = await Room.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedRoom = await Room.findByIdAndUpdate(req.params.id, req.body, {
+      new: true
+    });
     if (!updatedRoom) return res.status(404).json({ message: "Room not found" });
     res.json(updatedRoom);
   } catch (error) {
@@ -91,13 +80,31 @@ export const updateRoom = async (req, res) => {
   }
 };
 
-// Otağı sil
+// Soft sil (isDeleted = true)
 export const deleteRoom = async (req, res) => {
   try {
-    const deletedRoom = await Room.findByIdAndDelete(req.params.id);
-    if (!deletedRoom) return res.status(404).json({ message: "Room not found" });
-    res.json({ message: "Room deleted" });
+    const updatedRoom = await Room.findByIdAndUpdate(
+      req.params.id,
+      { isDeleted: true },
+      { new: true }
+    );
+    if (!updatedRoom) return res.status(404).json({ message: "Room not found" });
+    res.json({ message: "Room soft deleted" });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
+export const toggleRoomVisibility = async (req, res) => {
+  try {
+    const room = await Room.findById(req.params.id);
+    if (!room) return res.status(404).json({ message: "Room not found" });
+
+    room.isDeleted = !room.isDeleted; // dəyiş
+    await room.save();
+
+    res.json({ message: `Room is now ${room.isDeleted ? "hidden" : "visible"}`, room });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
