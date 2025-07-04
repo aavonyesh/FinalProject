@@ -2,15 +2,18 @@ import express from "express";
 import "dotenv/config";
 import cors from "cors";
 import connectDB from "./configs/db.js";
-import {clerkMiddleware} from '@clerk/express'
-import clerkWebhooks from "./controllers/clerkWebhooks.js";
+import { clerkMiddleware } from "@clerk/express";
 
-connectDB()
+import hotelRoute from "./routes/hotelRoute.js";
+import roomRoute from "./routes/roomRoute.js";
+connectDB();
 const app = express();
 app.use(cors());
-app.use(express.json())
-app.use(clerkMiddleware())
-app.use("/api/clerk",clerkWebhooks)
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(clerkMiddleware());
+app.use("/api/rooms", roomRoute);
+app.use("/api/hotels", hotelRoute);
 
 app.get("/", (req, res) => res.send("API is working"));
 

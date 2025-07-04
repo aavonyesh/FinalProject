@@ -23,8 +23,8 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Hotels", path: "/rooms" },
-    { name: "Experience", path: "/" },
-    { name: "About", path: "/" },
+    { name: "Experience", path: "/experience" },
+    { name: "About", path: "/about" },
   ];
 
   const [isScrolled, setIsScrolled] = useState(false);
@@ -92,14 +92,14 @@ const Navbar = () => {
             />
           </a>
         ))}
-        <button
+        {/* <button
           className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${
             isScrolled ? "text-black" : "text-white"
           } transition-all`}
           onClick={() => navigate("/owner")}
         >
           Dashboard
-        </button>
+        </button> */}
       </div>
 
       {/* Desktop Right */}
@@ -173,14 +173,14 @@ const Navbar = () => {
           </a>
         ))}
 
-        {user && (
+        {/* {user && (
           <button
             className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all"
             onClick={() => navigate("/owner")}
           >
             Dashboard
           </button>
-        )}
+        )} */}
         {!user && (
           <button
             onClick={openSignIn}
