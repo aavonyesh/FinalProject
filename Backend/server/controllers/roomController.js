@@ -1,15 +1,39 @@
 import Room from "../models/Room.js";
 
 // Otaq yarat
+
 export const createRoom = async (req, res) => {
   try {
-    const room = new Room(req.body);
+    const {
+      roomType,
+      roomName,
+      pricePerNight,
+      isAvailable,
+      amenities,
+      images,
+    } = req.body;
+
+    const room = new Room({
+      roomType,
+      roomName,
+      pricePerNight,
+      isAvailable: isAvailable ?? true,
+      amenities, // JSON.parse ETMƏ!
+      images,    // JSON.parse ETMƏ!
+    });
+
     await room.save();
     res.status(201).json(room);
   } catch (error) {
+    console.error("Room creation failed:", error.message);
     res.status(400).json({ message: error.message });
   }
+  console.log("Gelen body:", req.body);
+
 };
+
+
+
 
 // Bütün otaqları gətir (yalnız isDeleted: false olanları)
 export const getAllRooms = async (req, res) => {

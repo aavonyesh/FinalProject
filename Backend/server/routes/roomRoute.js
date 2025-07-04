@@ -1,4 +1,5 @@
 import express from "express";
+import multer from "multer";
 import {
   createRoom,
   getAllRooms,
@@ -10,8 +11,13 @@ import {
 
 const router = express.Router();
 
+// Multer konfiqurasiyası
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// ROUTES
 router.get("/", getAllRooms);
-router.post("/", createRoom);
+router.post("/", upload.array("images", 4), createRoom); // şəkilli otaq əlavə
 router.get("/:id", getRoomById);
 router.put("/:id", updateRoom);
 router.delete("/:id", deleteRoom);
